@@ -395,7 +395,7 @@ fs.writeFileSync(path.join(outputDir, "site-runtime-config.js"), `window.KITRADE
   crmIntakeUrl: config.crmIntakeUrl,
   analytics: runtimeAnalytics,
 })};\n`);
-const sitemapUrls = [canonicalUrl("/"), canonicalUrl("/catalog/"), canonicalUrl("/privacy-policy"), canonicalUrl("/personal-data-consent"), ...publicUrlRows.filter((row) => row.indexable).map((row) => row.canonical_url), ...paginationSitemapPaths.map(canonicalUrl)];
+const sitemapUrls = [canonicalUrl("/"), canonicalUrl("/catalog/"), canonicalUrl("/privacy-policy/"), canonicalUrl("/personal-data-consent/"), ...publicUrlRows.filter((row) => row.indexable).map((row) => row.canonical_url), ...paginationSitemapPaths.map(canonicalUrl)];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[...new Set(sitemapUrls)].map((url) => `  <url><loc>${escapeHtml(url)}</loc></url>`).join("\n")}\n</urlset>\n`;
 fs.writeFileSync(path.join(outputDir, "sitemap.xml"), sitemap);
 fs.writeFileSync(path.join(outputDir, "robots.txt"), isNonProductionBuild
@@ -616,8 +616,8 @@ function productPage(product, item) {
   <script src="/analytics.js?v=4"></script>
   <script src="/product-page.js?v=9"></script>
   <link rel="stylesheet" href="/basket-checkout.css?v=2">
-  <script src="/basket-checkout.js?v=1"></script>
-  <script src="/basket-drawer.js?v=3"></script>
+  <script src="/basket-checkout.js?v=2"></script>
+  <script src="/basket-drawer.js?v=4"></script>
   <script src="/privacy-controls.js?v=1"></script>
 </body>
 </html>`;

@@ -432,7 +432,7 @@ assert.ok(imageReport.filter((row) => row.source === "avito").every((row) => row
 assert.ok(imageReport.filter((row) => row.source === "yandex_disk_auth_page").every((row) => row.rights_status !== "confirmed_by_owner" && row.content_type !== "image/jpeg"), "Yandex Disk auth pages were treated as approved images");
 assert.ok(imageReport.every((row) => !row.schema_approved), "An image was approved for Product schema before the full review");
 assert.equal(validationSummary.image_rights_confirmed, imageSummary.avito_links, "Confirmed image-rights total differs from the per-link report");
-assert.equal(validationSummary.image_rights_pending, imageSummary.yandex_disk_auth_pages, "Pending image-rights total differs from the per-link report");
+assert.equal(validationSummary.image_rights_pending, imageReport.filter(row => row.rights_status !== "confirmed_by_owner").length, "Pending image-rights total differs from the per-link report");
 assert.equal(validationSummary.image_quality_review_pending, imageReport.length, "Image quality review total differs from the per-link report");
 
 const sitemapUrlSet = new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]));
@@ -467,7 +467,7 @@ const htmlPages = allHtmlFiles.map((file) => {
     robots: extract(html, /<meta[^>]+name=["']robots["'][^>]+content=["']([^"']*)/i),
   };
 });
-assert.equal(allHtmlFiles.length, 2606, "Generated HTML page count changed unexpectedly");
+assert.equal(allHtmlFiles.length, 2608, "Generated HTML page count changed unexpectedly");
 assert.equal(allHtmlFiles.length, internalLinkingAudit.summary.html_pages_scanned, "Favicon verification does not cover every audited HTML page");
 assert.ok(fs.existsSync(path.join(outputDir, "assets", "kitrade-logo.png")), "Favicon target asset is missing");
 for (const page of htmlPages) {

@@ -682,7 +682,7 @@ export function buildSeoState({ registry, items, indexes, config, rules, overrid
         height: observation.height ?? null,
         rights_status: source === "avito" ? "confirmed_by_owner" : "pending_owner_confirmation",
         rights_source: source === "avito" ? "company_avito_account" : null,
-        availability_status: observation.http_status >= 200 && observation.http_status < 400 && isImageResponse ? "approved" : (observation.observed_at ? "rejected" : "not_observed"),
+        availability_status: (observation.observation_method === "local_file_decode" || (observation.http_status >= 200 && observation.http_status < 400)) && isImageResponse ? "approved" : (observation.observed_at ? "rejected" : "not_observed"),
         resolution_status: observation.width && observation.height ? "pending_review" : "not_observed",
         product_match_status: "pending_review",
         watermark_status: "pending_review",
