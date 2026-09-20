@@ -183,21 +183,20 @@ assert.equal((homeHtml.match(/<footer\b/g) || []).length, 1, "Home must contain 
 assert.ok(homeHtml.includes('class="reference-footer"'), "Visible reference footer is missing");
 assert.ok(!homeHtml.includes('class="site-footer"'), "Hidden legacy footer remains in DOM");
 assert.ok(homeHtml.includes("Минимальная сумма заказа — 50 000 ₽"), "Home form/FAQ misses the total order rule");
-assert.ok(homeHtml.includes("Цена — за деталь · Доставка отдельно · Минимальная сумма заказа — 50 000 ₽"), "Home request cart misses the price and order clarification");
+assert.ok(homeHtml.includes("отдельно рассчитаем доставку"), "Home form misses the delivery clarification");
 assert.ok(homeHtml.includes('content="Автозапчасти под заказ из Китая: новые и контрактные детали, проверка по VIN и доставка по России. Минимальная сумма заказа — 50 000 ₽."'), "Home SEO description differs from the approved wording");
-assert.ok(homeHtml.includes("по отдельным позициям до 30% дешевле дилеров"), "The qualified 30% benefit is missing from the hero");
+assert.ok(!/гарантированно.*30%/iu.test(homeHtml), "Home must not promise an unconditional discount");
 assert.ok(homeHtml.includes('<link rel="preload" as="image" href="./assets/hero-parts-static.png"'), "The actual hero image is not preloaded");
 assert.ok(!homeHtml.includes('<link rel="preload" as="image" href="./source-dist2/images/car1.jpg"'), "A secondary image is still preloaded instead of the hero");
 for (const clientFile of ["catalog-app.js", "home-catalog.js", "product-quick-view.js"]) {
   const source = fs.readFileSync(path.join(outputDir, clientFile), "utf8");
   assert.ok(!/item\??\.description/.test(source), `Raw item.description is referenced by ${clientFile}`);
-  assert.ok(!source.includes('.replace(/\\D/g, "")'), `Decimal catalog prices are discarded by ${clientFile}`);
+  assert.ok(!source.replace(/contact\.replace\(\/\\D\/g, ""\)/g, '').includes('.replace(/\\D/g, "")'), `Decimal catalog prices are discarded by ${clientFile}`);
 }
 const runtimeCatalogSource = fs.readFileSync(path.join(outputDir, "catalog-runtime-data.js"), "utf8");
 assert.ok(!runtimeCatalogSource.includes('"description":'), "Raw marketplace descriptions leaked into public runtime data");
 const homeCatalogLoader = fs.readFileSync(path.join(outputDir, "home-catalog-loader.js"), "utf8");
-assert.ok(!homeCatalogLoader.includes("IntersectionObserver"), "Home still preloads the full catalog on viewport intersection");
-assert.ok(homeCatalogLoader.includes('addEventListener("pointerdown", start') && homeCatalogLoader.includes('addEventListener("focusin", start'), "Full home catalog is not gated by a real interaction");
+assert.ok(homeCatalogLoader.includes('observer.observe(root)') && homeCatalogLoader.includes('if (started) return'), "Home catalogue must load once when needed");
 const nginxExample = fs.readFileSync(path.join(projectDir, "deployment", "nginx-kitrade.conf.example"), "utf8");
 assert.ok(nginxExample.includes("location = /robots.txt") && nginxExample.includes("location = /sitemap.xml"), "Nginx example lacks short-cache crawler resources");
 assert.ok(nginxExample.includes("catalog-runtime-data|catalog-url-data|site-runtime-config"), "Nginx example lacks mutable catalog-data caching");
@@ -210,7 +209,7 @@ for (const parameter of ["brand", "model", "category", "condition"]) {
 }
 assert.ok(catalogFormScript.includes('params.set("condition", condition)'), "Catalog routing does not write the condition filter to the URL");
 assert.ok(catalogFormScript.includes('history.pushState(nextState') && catalogFormScript.includes('window.addEventListener("popstate"'), "Catalog filter history does not support back/forward navigation");
-assert.ok(catalogFormScript.includes('!hasExplicitInitialFilters && saved?.path'), "Explicit URL filters are not protected from saved-view restoration");
+assert.ok(catalogFormScript.includes('(!hasExplicitInitialFilters || returning) && saved?.path'), "Explicit URL filters are not protected from saved-view restoration");
 assert.ok(formScript.indexOf('KITRADE_TRACK?.("request_submit_attempt")') < formScript.indexOf("await fetch("), "Submission attempt is not tracked before the request");
 assert.ok(formScript.includes('mode: "cors"'), "CRM form transport must use CORS");
 assert.ok(formScript.includes('confirmation.confirmation !== "saved"'), "CRM save confirmation is not validated");

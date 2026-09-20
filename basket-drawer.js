@@ -18,7 +18,7 @@
       const product = products.get(entry.id) || entry;
       const price = Number(String(product.price || '').replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
       const rawPhoto = product.photos?.[0];
-      const photo = rawPhoto?.startsWith("/") ? (window.KITRADE_SITE_PATH?.(rawPhoto) || rawPhoto) : rawPhoto;
+      const photo = rawPhoto?.startsWith("/") ? (window.KITRADE_SITE_PATH?.(rawPhoto) || (String(window.KITRADE_SITE_CONFIG?.basePath || "").replace(/\/$/, "") + rawPhoto)) : rawPhoto;
       const title = product.title || `Позиция ${entry.id}`;
       total += price * entry.quantity; units += entry.quantity; unknown ||= !price;
       return `<article class="basket-row" data-od-id="basket-item-${escape(entry.id)}">
