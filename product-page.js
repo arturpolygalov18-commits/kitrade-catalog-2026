@@ -192,7 +192,7 @@
       return;
     }
     window.KITRADE_CART.add(product);
-    window.KITRADE_TRACK?.('add_to_request', { product_id: product.id, page_type: 'product' });
+    window.KITRADE_TRACK?.('add_to_cart', { product_id: product.id, page_type: 'product' });
     sync();
     animatePartToBasket(quantityControl);
     quantityControl.querySelector('[data-product-delta="1"]').focus({preventScroll:true});

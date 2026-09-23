@@ -18,11 +18,13 @@
       const product = products.get(entry.id) || entry;
       const price = Number(String(product.price || '').replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
       const rawPhoto = product.photos?.[0];
-      const photo = rawPhoto?.startsWith("/") ? (window.KITRADE_SITE_PATH?.(rawPhoto) || (String(window.KITRADE_SITE_CONFIG?.basePath || "").replace(/\/$/, "") + rawPhoto)) : rawPhoto;
+      const photo = rawPhoto?.startsWith("/assets/catalog-products/")
+        ? (window.KITRADE_SITE_PATH?.(rawPhoto) || (String(window.KITRADE_SITE_CONFIG?.basePath || "").replace(/\/$/, "") + rawPhoto))
+        : (window.KITRADE_PREVIEW_MODE && rawPhoto?.startsWith("data:image/") ? rawPhoto : "");
       const title = product.title || `Позиция ${entry.id}`;
       total += price * entry.quantity; units += entry.quantity; unknown ||= !price;
       return `<article class="basket-row" data-od-id="basket-item-${escape(entry.id)}">
-        <div class="basket-row-photo">${photo ? `<img src="${escape(photo)}" alt="${escape(title)}" loading="lazy">` : '<span>Фото уточняется</span>'}</div>
+        <div class="basket-row-photo">${photo ? `<img src="${escape(photo)}" alt="${escape(title)}" loading="lazy">` : '<span>Фото отсутствует</span>'}</div>
         <div class="basket-row-info"><h3>${escape(title)}</h3>
           <p>${price ? money(price) + ' за шт.' : 'Цена уточняется'}</p>
           <div class="basket-row-actions"><div class="basket-stepper" role="group" aria-label="Количество: ${escape(title)}">
@@ -41,7 +43,7 @@
       const next = [...list.querySelectorAll('[data-basket-item]')].find(button => button.dataset.basketItem === activeId && button.dataset.basketAction === activeAction);
       (next || drawer.querySelector('[data-basket-close]')).focus({ preventScroll: true });
     }
-    list.querySelectorAll('img').forEach(img => img.addEventListener('error', () => { img.parentElement.textContent = 'Фото уточняется'; }, { once: true }));
+    list.querySelectorAll('img').forEach(img => img.addEventListener('error', () => { img.parentElement.textContent = 'Фото отсутствует'; }, { once: true }));
   }
   function open() {
     if (!drawer) {

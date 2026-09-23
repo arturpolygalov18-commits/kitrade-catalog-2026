@@ -29,3 +29,7 @@ export function isDirectPublicImage(url) {
   const value = String(url || "").trim();
   return Boolean(value) && imageSource(value) !== "yandex_disk_auth_page";
 }
+
+export function isUploadedCatalogPhoto(url) {
+  return /^\/assets\/catalog-products\/[^?#]+(?:[?#].*)?$/.test(String(url || "").trim());
+}

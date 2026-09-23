@@ -1,11 +1,31 @@
 (() => {
  const sitePath = p => window.KITRADE_SITE_PATH?.(p) || (String(window.KITRADE_SITE_CONFIG?.basePath || "").replace(/\/$/, "") + p);
  document.querySelector('#product-inquiry')?.remove();
- const host=document.createElement('div');host.innerHTML="<dialog class=\"product-inquiry\" id=\"product-inquiry\" aria-labelledby=\"product-inquiry-title\" data-od-id=\"product-inquiry\">\n    <button class=\"product-inquiry-close\" type=\"button\" aria-label=\"Закрыть заявку\" data-inquiry-close>×</button>\n    <div class=\"product-inquiry-layout\">\n      <aside class=\"product-inquiry-visual\" data-od-id=\"product-inquiry-callout\">\n        <img src=\"/assets/08-contacts-phone-tag.png\" alt=\"\" width=\"1448\" height=\"1086\">\n        <div class=\"product-inquiry-visual-copy\">\n          <span>KITRADE</span>\n          <strong>Удобнее обсудить по телефону?</strong>\n          <p>Позвоните — менеджер уточнит детали, проверит корзину и подготовит расчёт стоимости и доставки.</p>\n          <a href=\"tel:+79952453000\" aria-label=\"Позвонить по номеру 8 (995) 245-30-00\">8 (995) 245-30-00</a>\n        </div>\n      </aside>\n      <div class=\"product-inquiry-content\">\n        <p class=\"product-page-category\">Расчёт заказа</p>\n        <h2 id=\"product-inquiry-title\">Куда отправить расчёт?</h2>\n        <p>Менеджер свяжется с вами по выбранному каналу.</p>\n        <form data-product-form>\n          <label>Ваше имя<input name=\"name\" autocomplete=\"name\" maxlength=\"100\" required></label>\n          <label>Телефон<input name=\"contact\" type=\"tel\" autocomplete=\"tel\" maxlength=\"25\" required placeholder=\"+7 (___) ___-__-__\"></label>\n          <fieldset class=\"product-inquiry-messengers\">\n            <legend>Удобный способ связи</legend>\n            <label><input type=\"radio\" name=\"messenger\" value=\"Max\" checked><span>Max</span></label>\n            <label><input type=\"radio\" name=\"messenger\" value=\"Telegram\"><span>Telegram</span></label>\n            <label><input type=\"radio\" name=\"messenger\" value=\"Звонок\"><span>Звонок</span></label>\n          </fieldset>\n          <label class=\"product-inquiry-consent\"><input name=\"consent\" type=\"checkbox\" required><span>Я согласен на обработку персональных данных на условиях <a href=\"/personal-data-consent/\" target=\"_blank\" rel=\"noopener\">согласия</a>.</span></label>\n          <p data-inquiry-status role=\"status\" aria-live=\"polite\"></p>\n          <button class=\"product-page-request\" type=\"submit\">Отправить на расчёт</button>\n        </form>\n      </div>\n    </div>\n  </dialog>";
+ const host=document.createElement('div');host.innerHTML="<dialog class=\"product-inquiry\" id=\"product-inquiry\" aria-labelledby=\"product-inquiry-title\" data-od-id=\"product-inquiry\">\n    <button class=\"product-inquiry-close\" type=\"button\" aria-label=\"Закрыть заявку\" data-inquiry-close>×</button>\n    <div class=\"product-inquiry-layout\">\n      <aside class=\"product-inquiry-visual\" data-od-id=\"product-inquiry-callout\">\n        <img src=\"/assets/08-contacts-phone-tag.png\" alt=\"\" width=\"1448\" height=\"1086\">\n        <div class=\"product-inquiry-visual-copy\">\n          <span>KITRADE</span>\n          <strong>Удобнее обсудить по телефону?</strong>\n          <p>Позвоните — менеджер уточнит детали, проверит корзину и подготовит расчёт стоимости и доставки.</p>\n          <a href=\"tel:+79952453000\" aria-label=\"Позвонить по номеру +7 (995) 245-30-00\">+7 (995) 245-30-00</a>\n        </div>\n      </aside>\n      <div class=\"product-inquiry-content\">\n        <p class=\"product-page-category\">Расчёт заказа</p>\n        <h2 id=\"product-inquiry-title\">Куда отправить расчёт?</h2>\n        <p>Менеджер свяжется с вами по выбранному каналу.</p>\n        <form data-product-form>\n          <label>Ваше имя<input name=\"name\" autocomplete=\"name\" maxlength=\"100\" required></label>\n          <label>Телефон<input name=\"contact\" type=\"tel\" autocomplete=\"tel\" maxlength=\"25\" required placeholder=\"+7 (___) ___-__-__\"></label>\n          <fieldset class=\"product-inquiry-messengers\">\n            <legend>Удобный способ связи</legend>\n            <label><input type=\"radio\" name=\"messenger\" value=\"Max\" checked><span>Max</span></label>\n            <label><input type=\"radio\" name=\"messenger\" value=\"Telegram\"><span>Telegram</span></label>\n            <label><input type=\"radio\" name=\"messenger\" value=\"Звонок\"><span>Звонок</span></label>\n          </fieldset>\n          <label class=\"product-inquiry-consent\"><input name=\"consent\" type=\"checkbox\" required><span>Я согласен на обработку персональных данных на условиях <a href=\"/personal-data-consent/\" target=\"_blank\" rel=\"noopener\">согласия</a>.</span></label>\n          <p data-inquiry-status role=\"status\" aria-live=\"polite\"></p>\n          <button class=\"product-page-request\" type=\"submit\">Отправить на расчёт</button>\n        </form>\n      </div>\n    </div>\n  </dialog>";
  const dialog=host.firstElementChild;
  dialog.querySelectorAll("[src],[href]").forEach(el=>{for(const a of ["src","href"]){const v=el.getAttribute(a);if(v?.startsWith("/"))el.setAttribute(a,sitePath(v));}});
  document.documentElement.append(dialog);
  const form=dialog.querySelector('form'),status=dialog.querySelector('[data-inquiry-status]');
+ const contactInput=form?.elements.contact;
+ const contactDrafts={phone:'',telegram:''};
+ let contactMode='phone';
+ const syncContactField=()=>{
+   const telegram=form?.elements.messenger?.value==='Telegram';
+   const nextMode=telegram?'telegram':'phone';
+   if(contactInput){
+     contactDrafts[contactMode]=contactInput.value;
+     contactMode=nextMode;
+     contactInput.type=telegram?'text':'tel';
+     contactInput.autocomplete=telegram?'off':'tel';
+     contactInput.inputMode=telegram?'text':'tel';
+     contactInput.placeholder=telegram?'@username':'+7 (___) ___-__-__';
+     contactInput.value=contactDrafts[contactMode];
+     const labelText=[...contactInput.parentElement.childNodes].find(node=>node.nodeType===Node.TEXT_NODE);
+     if(labelText)labelText.nodeValue=telegram?'Telegram username':'Телефон';
+   }
+   status.textContent='';
+ };
+ form?.querySelectorAll('input[name="messenger"]').forEach(radio=>radio.addEventListener('change',syncContactField));
  let opener;
  window.addEventListener('kitrade:checkout',()=>{
    if(!window.KITRADE_CART?.items().length)return;
@@ -20,9 +40,15 @@
   form?.addEventListener('submit', async event => {
     event.preventDefault();
     if (submitting || !form.reportValidity()) return;
+    const messenger = form.elements.messenger.value;
     const contact = form.elements.contact.value.trim();
-    if (!/^\d{10,15}$/.test(contact.replace(/\D/g, ''))) {
-      status.textContent = 'Укажите корректный номер телефона.';
+    const contactValid = messenger === 'Telegram'
+      ? /^@?[A-Za-z0-9_]{5,32}$/.test(contact)
+      : /^\d{10,15}$/.test(contact.replace(/\D/g, ''));
+    if (!contactValid) {
+      status.textContent = messenger === 'Telegram'
+        ? 'Укажите корректный Telegram username.'
+        : 'Укажите корректный номер телефона.';
       form.elements.contact.focus();
       return;
     }
@@ -35,7 +61,7 @@
     if (!products.length) { status.textContent = 'Добавьте детали в корзину.'; return; }
     const orderId = `product-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const payload = {
-      external_id: orderId, website: '', client: { name, contact, messenger: form.elements.messenger.value },
+      external_id: orderId, website: '', client: { name, contact, messenger },
       vehicle: { model: '', year: '', vin: '' },
       details: products.map(item => `${item.title}: ${item.quantity} шт.`).join('\n') + '\nЗапрос стоимости с доставкой.', photos: [],
       order: { order_id: orderId, attribution: window.KITRADE_GET_ATTRIBUTION?.() || {

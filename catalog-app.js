@@ -64,6 +64,7 @@
     models: urlFilterValues("model"),
     categories: urlFilterValues("category"),
     condition: initialFilterParams.get("condition") || "",
+    origin: initialFilterParams.get("origin") || "",
   };
   const hasExplicitInitialFilters = Boolean(
     routeDefaults.brand
@@ -73,7 +74,8 @@
     || requestedUrlFilters.brands.length
     || requestedUrlFilters.models.length
     || requestedUrlFilters.categories.length
-    || requestedUrlFilters.condition,
+    || requestedUrlFilters.condition
+    || requestedUrlFilters.origin,
   );
   const PAGE_SIZE = 24;
   const DISPLAY_PAGE_SIZE = 16;
@@ -96,7 +98,7 @@
       article,
       cardDescription: compactCardDescription(item.card_description),
       condition: item.condition || "",
-      origin: item.origin || "",
+      origin: classifyOrigin(item),
       brand: item.brand || "Без марки",
       model: item.model || "Модель не указана",
       search: [title, item.brand, item.model, article, item.category, item.subcategory, item.detail]
@@ -105,7 +107,7 @@
         .toLocaleLowerCase("ru"),
       group: item.public_category || getGroup(item),
       canonicalPath: sitePath(item.canonical_path || "/catalog/"),
-      image: normalizePhoto(item.photos?.[0]) || catalogFallbackPhoto(item),
+      image: normalizePhoto(item.photos?.[0]),
       priceNumber: Number(String(item.price || "").replace(/[^\d.,]/g, "").replace(",", ".")) || 0,
     });
     });
@@ -169,21 +171,18 @@
 
   function normalizePhoto(url) {
     const value = String(url || "").trim();
-    if (!value) return "";
-    const match = value.match(/[?&]imageSlug=([^&]+)/);
-    if (match) return `https://80.img.avito.st${decodeURIComponent(match[1])}`;
-    return value.startsWith("/") ? sitePath(value) : value.replace(/^http:\/\//i, "https://");
+    if (value.startsWith("/assets/catalog-products/")) return sitePath(value);
+    if (window.KITRADE_PREVIEW_MODE && value.startsWith("data:image/")) return value;
+    return "";
   }
 
-  function catalogFallbackPhoto(item) {
-    if (window.KITRADE_PREVIEW_MODE) return "";
-    const subject = [item.title, item.detail, item.subcategory, item.category]
-      .filter(Boolean)
-      .join(" ")
-      .toLocaleLowerCase("ru");
-    if (/фара|фонарь|оптика|автосвет/.test(subject)) return sitePath("/assets/01-catalog-led-headlamp.png");
-    if (/крыло/.test(subject)) return sitePath("/assets/02-catalog-front-fender.png");
-    if (/реш[её]тка|нижн[^ ]* бампер/.test(subject)) return sitePath("/assets/03-catalog-lower-grille.png");
+  function classifyOrigin(item) {
+    const explicit = String(item.origin || "").toLocaleLowerCase("ru");
+    if (/аналог/.test(explicit)) return "Аналог";
+    if (/оригинал/.test(explicit)) return "Оригинал";
+    const description = [item.title, item.detail].filter(Boolean).join(" ").toLocaleLowerCase("ru");
+    if (/аналог/.test(description)) return "Аналог";
+    if (/оригинал/.test(description)) return "Оригинал";
     return "";
   }
 
@@ -213,12 +212,25 @@
     return "";
   }
 
+  function originQueryValue(value) {
+    if (value === "Оригинал") return "original";
+    if (value === "Аналог") return "analog";
+    return "";
+  }
+
+  function originFromQuery(value) {
+    if (["original", "оригинал"].includes(String(value || "").toLocaleLowerCase("ru"))) return "Оригинал";
+    if (["analog", "аналог"].includes(String(value || "").toLocaleLowerCase("ru"))) return "Аналог";
+    return "";
+  }
+
   function catalogHistoryState() {
     return {
       brands: checkedValues("#brandFilters"),
       models: checkedValues("#modelFilters"),
       categories: checkedValues("#typeFilters"),
       condition: selectedCondition(),
+      origin: selectedOrigin(),
       query: state.query,
       page: state.page,
       offset: state.offset,
@@ -244,11 +256,14 @@
     params.delete("model");
     params.delete("category");
     params.delete("condition");
+    params.delete("origin");
     if (brand && !brandRoute) params.append("brand", brand);
     if (model && !modelRoute) params.append("model", model);
     if (categories.length && !categoryRoute) categories.forEach((value) => params.append("category", value));
     const condition = conditionQueryValue(selectedCondition());
     if (condition) params.set("condition", condition);
+    const origin = originQueryValue(selectedOrigin());
+    if (origin) params.set("origin", origin);
     const search = params.toString();
     const browserUrl = `${browserPath}${search ? `?${search}` : ""}${window.location.hash}`;
     const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
@@ -363,8 +378,11 @@
       params.delete("model");
       params.delete("category");
       params.delete("condition");
+      params.delete("origin");
       const condition = conditionQueryValue(selectedCondition());
       if (condition) params.set("condition", condition);
+      const origin = originQueryValue(selectedOrigin());
+      if (origin) params.set("origin", origin);
       const search = params.toString();
       return `${sitePath(path)}${search ? `?${search}` : ""}${window.location.hash}`;
     };
@@ -454,6 +472,10 @@
       input.checked = input.value === condition;
     });
     if (!condition) document.querySelector('#conditionFilters input[value=""]').checked = true;
+    const origin = originFromQuery(filters.origin);
+    document.querySelectorAll("#originFilters input").forEach((input) => {
+      input.checked = input.value === origin;
+    });
     ["#brandFilters", "#modelFilters", "#typeFilters"].forEach((selector) => {
       updateFilterSummary(document.querySelector(selector));
     });
@@ -463,11 +485,16 @@
     return document.querySelector('#conditionFilters input:checked')?.value || "";
   }
 
+  function selectedOrigin() {
+    return document.querySelector('#originFilters input:checked')?.value || "";
+  }
+
   function getFilteredItems() {
     const brands = checkedValues("#brandFilters");
     const models = checkedValues("#modelFilters");
     const types = checkedValues("#typeFilters");
     const condition = selectedCondition().toLocaleLowerCase("ru");
+    const origin = selectedOrigin();
 
     const scores = new Map();
     const filtered = items
@@ -476,6 +503,7 @@
         if (models.length && !models.includes(item.model)) return false;
         if (types.length && !types.includes(item.group)) return false;
         if (condition && !String(item.condition || "").toLocaleLowerCase("ru").startsWith(condition.slice(0, 5))) return false;
+        if (origin && item.origin !== origin) return false;
         if (state.query) {
           const score = fuzzyScore(state.query, item.search);
           if (score < 0) return false;
@@ -498,7 +526,7 @@
 
   function formatPrice(item) {
     if (!item.priceNumber) return "Цена по запросу";
-    return `${new Intl.NumberFormat("ru-RU").format(item.priceNumber)} ₽`;
+    return `${new Intl.NumberFormat("ru-RU").format(item.priceNumber)} <span class="currency-ruble" aria-label="рублей">₽</span>`;
   }
 
   function deliveryLabel() {
@@ -512,15 +540,15 @@
       <button type="button" data-quantity-id="${key}" data-quantity-delta="-1" aria-label="Уменьшить количество">−</button>
       <output aria-live="polite" aria-atomic="true">${quantity}</output>
       <button type="button" data-quantity-id="${key}" data-quantity-delta="1" aria-label="Увеличить количество">+</button>
-    </div>` : `<button class="card-action" type="button" data-add="${key}">В заявку</button>`;
+    </div>` : `<button class="card-action" type="button" data-add="${key}">В корзину</button>`;
   }
 
   function cardMarkup(item) {
     const selected = state.selected.includes(item.id);
     const href = item.indexable ? ` href="${escapeHtml(item.canonicalPath)}"` : "";
     const image = item.image
-      ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false" /><div class="photo-fallback" hidden>Фото уточняется</div>`
-      : `<div class="photo-fallback">Фото уточняется</div>`;
+      ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false" /><div class="photo-fallback" hidden>Фото отсутствует</div>`
+      : `<div class="photo-fallback">Фото отсутствует</div>`;
     return `
       <article class="part-card" data-id="${escapeHtml(item.id)}" data-od-id="product-${escapeHtml(item.id)}" data-product-card data-product-id="${escapeHtml(item.id)}">
         <a class="part-photo"${href} data-product-link data-product-id="${escapeHtml(item.id)}">${image}</a>
@@ -652,6 +680,7 @@
     });
     renderModelFilter([]);
     document.querySelector('#conditionFilters input[value=""]').checked = true;
+    document.querySelector('#originFilters input[value=""]').checked = true;
     updateFilterSummary(document.querySelector("#brandFilters"));
     updateFilterSummary(document.querySelector("#typeFilters"));
   }
@@ -784,7 +813,7 @@
     }
     window.KITRADE_CART.add(items.find(item => item.id === id));
     persistSelection();
-    if (state.selected.includes(id)) window.KITRADE_TRACK?.("add_to_request", { product_id: id, page_type: "catalog" });
+    if (state.selected.includes(id)) window.KITRADE_TRACK?.("add_to_cart", { product_id: id, page_type: "catalog" });
     renderRequest();
     showToast(state.selected.includes(id) ? "Запчасть добавлена в корзину" : "Запчасть удалена из корзины");
   });
@@ -1073,6 +1102,7 @@
     models: [routeDefaults.model || requestedUrlFilters.models[0]].filter(Boolean),
     categories: routeDefaults.category ? [routeDefaults.category] : requestedUrlFilters.categories,
     condition: requestedUrlFilters.condition,
+    origin: requestedUrlFilters.origin,
   });
   document.addEventListener("kitrade:add-product", (event) => {
     const id = String(event.detail?.id || "");
@@ -1132,7 +1162,7 @@
       path: location.pathname, query: state.query, visible: state.visible,
       page: state.page, offset: state.offset, y: window.scrollY,
       brands: checkedValues('#brandFilters'), models: checkedValues('#modelFilters'),
-      categories: checkedValues('#typeFilters'), condition: selectedCondition()
+      categories: checkedValues('#typeFilters'), condition: selectedCondition(), origin: selectedOrigin()
     })); } catch {}
   };
   window.addEventListener('pagehide', saveView);
@@ -1153,6 +1183,7 @@
       check('#modelFilters', saved.models || []);
       check('#typeFilters', saved.categories || []);
       check('#conditionFilters', [saved.condition || '']);
+      check('#originFilters', [saved.origin || '']);
       ['#brandFilters', '#modelFilters', '#typeFilters'].forEach(selector => updateFilterSummary(document.querySelector(selector)));
       Object.assign(state, { query: saved.query || '', visible: saved.visible || DISPLAY_PAGE_SIZE, page: saved.page || 1, offset: saved.offset || 0 });
       document.querySelector('#catalogQuery').value = state.query;

@@ -28,16 +28,8 @@
 
   const normalizePhoto = (url) => {
     const value = String(url || "").trim();
-    const match = value.match(/[?&]imageSlug=([^&]+)/);
-    if (match) return `https://80.img.avito.st${decodeURIComponent(match[1])}`;
-    return value.replace(/^http:\/\//i, "https://");
-  };
-
-  const fallbackPhoto = (item) => {
-    const value = [item.title, item.detail, item.category].filter(Boolean).join(" ").toLocaleLowerCase("ru");
-    if (/фар|фонар|оптик/.test(value)) return sitePath("/assets/01-catalog-led-headlamp.png");
-    if (/крыл/.test(value)) return sitePath("/assets/02-catalog-front-fender.png");
-    if (/реш[её]тк|бампер/.test(value)) return sitePath("/assets/03-catalog-lower-grille.png");
+    if (value.startsWith("/assets/catalog-products/")) return sitePath(value);
+    if (window.KITRADE_PREVIEW_MODE && value.startsWith("data:image/")) return value;
     return "";
   };
 
@@ -148,7 +140,7 @@
       condition: item.condition || "",
       origin: item.origin || "",
       canonicalPath: sitePath(item.canonical_path || "/catalog/"),
-      image: normalizePhoto(item.photos?.[0]) || fallbackPhoto(item),
+      image: normalizePhoto(item.photos?.[0]),
       search: [title, item.brand, item.model, article, item.category, item.detail]
         .filter(Boolean)
         .join(" ")
@@ -328,8 +320,8 @@
   ));
 
   const imageMarkup = (item) => item.image
-    ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false" /><div class="vehicle-result-no-photo" hidden>Фото уточняется</div>`
-    : `<div class="vehicle-result-no-photo">Фото уточняется</div>`;
+    ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false" /><div class="vehicle-result-no-photo" hidden>Фото отсутствует</div>`
+    : `<div class="vehicle-result-no-photo">Фото отсутствует</div>`;
 
   const resultCard = (item) => {
     const href = item.indexable ? ` href="${escapeHtml(item.canonicalPath)}"` : "";
@@ -342,7 +334,7 @@
         <small>${escapeHtml([item.condition, item.origin].filter(Boolean).join(" · ") || "Проверим по VIN")}</small>
         <div>
           <strong>${formatPrice(item.price)}</strong>
-          <button type="button" data-add-part="${escapeHtml(item.id)}">${selected.has(String(item.id)) ? "Добавлено" : "В заявку"}</button>
+          <button type="button" data-add-part="${escapeHtml(item.id)}">${window.KITRADE_CART?.get(item.id) ? "В корзине" : "В корзину"}</button>
         </div>
       </div>
     </article>`;
@@ -369,8 +361,9 @@
       </div>`).join("");
 
     resultsGrid.querySelectorAll("[data-add-part]").forEach((button) => {
-      button.textContent = selected.has(button.dataset.addPart) ? "Добавлено" : "В заявку";
-      button.classList.toggle("is-added", selected.has(button.dataset.addPart));
+      const inCart = Boolean(window.KITRADE_CART?.get(button.dataset.addPart));
+      button.textContent = inCart ? "В корзине" : "В корзину";
+      button.classList.toggle("is-added", inCart);
     });
   };
 
@@ -479,8 +472,9 @@
     if (!button) return;
     const item = currentResults.find((candidate) => String(candidate.id) === button.dataset.addPart);
     if (!item) return;
-    if (selected.has(String(item.id))) selected.delete(String(item.id));
-    else selected.set(String(item.id), item);
+    const id = String(item.id);
+    if (window.KITRADE_CART?.get(id)) window.KITRADE_CART.remove(id);
+    else window.KITRADE_CART?.add(item);
     renderRequest();
   });
 
@@ -494,8 +488,8 @@
   document.addEventListener("kitrade:add-product", (event) => {
     const id = String(event.detail?.id || "");
     const item = items.find((candidate) => String(candidate.id) === id);
-    if (!item || selected.has(id)) return;
-    selected.set(id, item);
+    if (!item || window.KITRADE_CART?.get(id)) return;
+    window.KITRADE_CART?.add(item);
     renderRequest();
   });
 

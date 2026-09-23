@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { isDirectPublicImage, normalizePhoto, readCatalogData } from "./lib/data.mjs";
+import { isUploadedCatalogPhoto, normalizePhoto, readCatalogData } from "./lib/data.mjs";
 import { isVisibleCatalogItem } from "./lib/domain.mjs";
 import { createEmptyRegistry, registryIndexes, syncRegistry, validateRegistry } from "./lib/registry.mjs";
 import { buildSeoState, toCsv } from "./lib/seo.mjs";
@@ -544,7 +544,7 @@ const runtimeItems = registry.entities.products.map((product) => {
   const category = indexes.categories.get(product.category_id);
   const content = seoState.productState.get(product.product_id)?.content || {};
   const rawPhoto = item?.photos?.[0];
-  const photo = isDirectPublicImage(rawPhoto) ? normalizePhoto(rawPhoto) : "";
+  const photo = isUploadedCatalogPhoto(rawPhoto) ? normalizePhoto(rawPhoto) : "";
   return {
     id: String(item?.id || product.source_id),
     product_id: product.product_id,
@@ -563,7 +563,7 @@ const runtimeItems = registry.entities.products.map((product) => {
     origin: content.origin || "",
     price: item?.price || "",
     article: content.article || "",
-    photos: (item?.photos || []).filter(isDirectPublicImage).map(normalizePhoto),
+    photos: (item?.photos || []).filter(isUploadedCatalogPhoto).map(normalizePhoto),
     canonical_path: product.canonical_path,
     indexable: Boolean(seoState.productState.get(product.product_id)?.indexable),
     card_description: content.cardDescription || "",

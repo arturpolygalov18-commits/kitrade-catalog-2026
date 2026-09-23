@@ -2192,6 +2192,225 @@
 
 
     </style>
+    <style>
+      /* Compact request overview: all copy sits on the image card. */
+      html body.reference-only #about.reference-process {
+        box-sizing: border-box;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 42px 24px !important;
+        overflow: visible;
+      }
+
+      html body.reference-only #about .process-compact {
+        position: relative;
+        isolation: isolate;
+        box-sizing: border-box;
+        width: min(100%, 1420px);
+        min-height: 400px;
+        margin: 0 auto;
+        padding: 42px 50px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, .13);
+        border-radius: 24px;
+        background: #111310;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, .24);
+      }
+
+      html body.reference-only #about .process-compact::after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        inset: 0;
+        background: linear-gradient(90deg, #101311 0%, rgba(16, 19, 17, .96) 43%, rgba(16, 19, 17, .48) 72%, rgba(16, 19, 17, .1) 100%);
+        pointer-events: none;
+      }
+
+      html body.reference-only #about .process-compact-image {
+        position: absolute;
+        z-index: -2;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 76% center;
+        filter: brightness(.92);
+        pointer-events: none;
+      }
+
+      html body.reference-only #about .process-compact-content {
+        width: min(100%, 870px);
+      }
+
+      html body.reference-only #about .process-compact h2 {
+        max-width: 780px;
+        margin: 0 0 26px;
+        color: #f6f6f6;
+        font-size: clamp(30px, 3vw, 46px);
+        font-weight: 420;
+        line-height: 1.12;
+        letter-spacing: -.025em;
+      }
+
+      html body.reference-only #about .process-compact-benefits {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 28px;
+      }
+
+      html body.reference-only #about .process-compact-benefits h3 {
+        margin: 0 0 8px;
+        color: #f2f2f2;
+        font-size: 20px;
+        font-weight: 550;
+      }
+
+      html body.reference-only #about .process-compact-benefits p {
+        margin: 0;
+        color: rgba(255, 255, 255, .76);
+        font-size: 16px;
+        line-height: 1.45;
+      }
+
+      html body.reference-only #about .process-compact-benefits a {
+        color: inherit;
+        text-decoration-color: rgba(255, 255, 255, .55);
+        text-underline-offset: 3px;
+      }
+
+      html body.reference-only #about .process-compact-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 24px;
+        margin-top: 27px;
+      }
+
+      html body.reference-only #about .process-compact-actions .process-primary,
+      html body.reference-only #about .process-compact-actions .process-secondary {
+        min-height: 48px;
+        font-size: 16px;
+      }
+
+      html body.reference-only #about .process-compact-actions .process-primary {
+        padding: 0 24px;
+      }
+
+      html body.reference-only[data-artboard="1920"] #about.reference-process {
+        padding: 24px 20px !important;
+      }
+
+      html body.reference-only[data-artboard="1920"] #about .process-compact {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        max-width: none;
+        min-height: clamp(480px, 52vh, 580px);
+        padding: clamp(42px, 4vw, 72px);
+        border-color: rgba(255, 255, 255, .32);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 20px 50px rgba(0, 0, 0, .28);
+      }
+
+      html body.reference-only[data-artboard="1920"] #about .process-compact::after {
+        background: linear-gradient(90deg, #080a0a 0%, rgba(8, 10, 10, .98) 35%, rgba(8, 10, 10, .78) 54%, rgba(8, 10, 10, .04) 100%);
+      }
+
+      html body.reference-only[data-artboard="1920"] #about .process-compact-image {
+        filter: brightness(1.08) contrast(1.04);
+      }
+
+      html body.reference-only[data-artboard="1920"] #about .process-compact-content {
+        width: min(100%, 1000px);
+      }
+
+      html body.reference-only[data-artboard="1920"] #about .process-compact h2 {
+        max-width: 900px;
+        margin-bottom: 34px;
+        font-size: clamp(46px, 3.3vw, 64px);
+      }
+
+      html body.reference-only[data-artboard="1920"] #about .process-compact-benefits {
+        gap: 40px;
+      }
+
+      html body.reference-only[data-artboard="1920"] #about .process-compact-benefits p {
+        font-size: 18px;
+      }
+
+      html body.reference-only[data-artboard="1920"] #about .process-compact-actions {
+        margin-top: 36px;
+      }
+
+      @media (max-width: 900px) {
+        html body.reference-only #about.reference-process {
+          padding: 28px 20px !important;
+        }
+
+        html body.reference-only #about .process-compact {
+          min-height: 0;
+          padding: 34px;
+        }
+
+        html body.reference-only #about .process-compact-content {
+          width: min(100%, 640px);
+        }
+
+        html body.reference-only #about .process-compact-image {
+          opacity: .7;
+        }
+      }
+
+      @media (max-width: 600px) {
+        html body.reference-only #about.reference-process {
+          padding: 20px 16px !important;
+        }
+
+        html body.reference-only #about .process-compact {
+          padding: 25px 22px;
+          border-radius: 18px;
+        }
+
+        html body.reference-only #about .process-compact::after {
+          background: linear-gradient(180deg, rgba(16, 19, 17, .96) 0%, rgba(16, 19, 17, .92) 58%, rgba(16, 19, 17, .5) 100%);
+        }
+
+        html body.reference-only #about .process-compact-image {
+          object-position: 79% center;
+          opacity: .45;
+        }
+
+        html body.reference-only #about .process-compact h2 {
+          margin-bottom: 20px;
+          font-size: clamp(26px, 7vw, 34px);
+        }
+
+        html body.reference-only #about .process-compact-benefits {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+
+        html body.reference-only #about .process-compact-benefits h3 {
+          font-size: 18px;
+        }
+
+        html body.reference-only #about .process-compact-benefits p {
+          font-size: 14px;
+        }
+
+        html body.reference-only #about .process-compact-actions {
+          align-items: stretch;
+          flex-direction: column;
+          gap: 8px;
+          margin-top: 22px;
+        }
+
+        html body.reference-only #about .process-compact-actions .process-primary,
+        html body.reference-only #about .process-compact-actions .process-secondary {
+          min-height: 46px;
+          font-size: 14px;
+        }
+      }
+    </style>
   <script src="./cart-store.js?v=6"></script>
 </head>
   <body class="reference-only">
@@ -2212,7 +2431,7 @@
         </nav>
 
         <div class="reference-header-actions">
-          <a class="reference-phone" href="tel:+79952453000" aria-label="Позвонить по номеру 8 (995) 245-30-00">8 (995) 245-30-00</a>
+          <a class="reference-phone" href="tel:+79952453000" aria-label="Позвонить по номеру +7 (995) 245-30-00">+7 (995) 245-30-00</a>
           <a class="reference-contact" href="#contacts" data-od-id="header-cart">Связаться с нами</a>
           <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-navigation" aria-label="Открыть меню" data-menu-toggle="">
             <span></span><span></span><span></span>
@@ -2252,44 +2471,22 @@
         <div class="reference-parts-visual" aria-hidden="true"></div>
       </section>
 
-      <section class="reference-process" id="about" aria-labelledby="process-title">
-        <div class="reference-process-shell">
-          <div class="process-card" data-reveal="scale">
-            <div class="process-card-copy" style="padding-top: 20px; padding-right: 40px;">
-              <div class="process-card-intro--desktop">
-                <div style="margin-bottom: 20px; color: rgba(255, 255, 255, 0.5); font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;">Поиск под заказ</div>
-                <h3 style="max-width: none; font-size: 32px; font-weight: 540; line-height: 1.05; letter-spacing: -0.025em; white-space: nowrap;">Не нашли запчасть?</h3>
-                <p style="max-width: 440px; margin-top: 16px; color: rgba(255, 255, 255, 0.68); font-size: 16px; line-height: 1.6; font-weight: 400;"><b style="color: #fff; font-weight: 500;">Отправьте запрос.</b> Проверим поставщиков<br>в Китае и предложим подходящие варианты.</p>
-              </div>
-              <strong class="process-card-offer--desktop"><b>1</b><span><small>ЗАПРОС</small><em>ОТ ПОДБОРА<br>ДО ДОСТАВКИ</em></span></strong>
-            </div>
-            <img class="process-card-disc" src="./assets/brake-disc-transparent.png" alt="Тормозной диск" width="1774" height="887" loading="lazy">
-            <div class="process-card-media" aria-hidden="true"></div>
-          </div>
-
-          <div class="process-content">
-            <h2 id="process-title" data-reveal="">Подбор автозапчастей и<br>расчёт доставки из КНР в РФ</h2>
-
-            <div class="process-benefits">
-              <article data-reveal="">
-                <div>
-                  <h3>Подбор</h3>
-                  <p>
-                    Для поиска нужных деталей необходим только <a href="/podbor-zapchastey-po-vin/">VIN-номер</a> автомобиля и список. Мы бесплатно осуществим поиск и подбор.
-                  </p>
-                </div>
+      <section class="reference-process" id="about" aria-labelledby="process-title" data-od-id="path-2-1">
+        <div class="process-compact">
+          <img class="process-compact-image" src="./assets/07-request-form-headlamp-vin.png" alt="" width="1672" height="941" loading="lazy">
+          <div class="process-compact-content">
+            <h2 id="process-title">Подбор автозапчастей и расчёт доставки из КНР в РФ</h2>
+            <div class="process-compact-benefits">
+              <article>
+                <h3>Подбор</h3>
+                <p>Для поиска нужных деталей необходим только <a href="/podbor-zapchastey-po-vin/">VIN-номер</a> автомобиля и список. Мы бесплатно осуществим поиск и подбор.</p>
               </article>
-              <article data-reveal="">
-                <div>
-                  <h3>Доставка</h3>
-                  <p>
-                    Рассчитаем стоимость, упакуем и отправим удобной для вас транспортной компанией.
-                  </p>
-                </div>
+              <article>
+                <h3>Доставка</h3>
+                <p>Рассчитаем стоимость, упакуем и отправим удобной для вас транспортной компанией.</p>
               </article>
             </div>
-
-            <div class="process-actions" data-reveal="">
+            <div class="process-compact-actions">
               <a class="process-primary" href="#request">Запросить подбор</a>
               <a class="process-secondary" href="/catalog/">Перейти в каталог <span aria-hidden="true">→</span></a>
             </div>
@@ -2808,7 +3005,7 @@
             <div class="form-success" hidden="" data-form-success="" tabindex="-1">
               <h3>Заявка отправлена</h3>
               <p>Спасибо! Менеджер свяжется с вами в ближайшее рабочее время.</p>
-              <a href="tel:+79952453000">8 (995) 245-30-00</a>
+              <a href="tel:+79952453000">+7 (995) 245-30-00</a>
               <button type="button" data-reset-form="">Отправить ещё одну заявку</button>
             </div>
           </form>
@@ -2826,12 +3023,12 @@
             <article class="reference-contact-card reference-contact-card-main" data-reveal="">
               <div class="reference-contact-card-copy">
                 <h3>Телефоны и электронная почта</h3>
-                <a class="reference-contact-phone reference-contact-phone-main" href="tel:+79952453000">8 (995) 245-30-00</a>
+                <a class="reference-contact-phone reference-contact-phone-main" href="tel:+79952453000">+7 (995) 245-30-00</a>
                 <a class="reference-contact-phone" href="tel:+79069461999">+7 (906) 946-19-99</a>
                 <a class="reference-contact-phone" href="tel:+79952455155">+7 (995) 245-51-55</a>
                 <a class="reference-contact-email" href="mailto:kitrade@bk.ru">kitrade@bk.ru</a>
                 <div class="reference-contact-actions">
-                  <a class="reference-contact-call" href="tel:+79952453000" aria-label="Позвонить по номеру 8 (995) 245-30-00">Позвонить</a>
+                  <a class="reference-contact-call" href="tel:+79952453000" aria-label="Позвонить по номеру +7 (995) 245-30-00">Позвонить</a>
                   <a class="reference-contact-manager" href="https://vk.me/kitrade22" target="_blank" rel="noreferrer">Написать <span aria-hidden="true">→</span></a>
                 </div>
               </div>

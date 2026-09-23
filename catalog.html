@@ -1,22 +1,20 @@
 <!doctype html>
-<html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="./" />
-    <link rel="icon" type="image/png" href="./assets/kitrade-logo.png" />
+<html lang="ru"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="./assets/kitrade-logo.png">
     <title>Каталог автозапчастей | Китрейд</title>
-    <meta name="description" content="Каталог автозапчастей под заказ из Китая с проверкой совместимости по VIN." />
-    <link rel="canonical" href="https://xn--d1abifc1bn.xn--p1ai/catalog/" />
-    <link rel="stylesheet" href="./catalog-v2.css?v=30" />
-    <link rel="stylesheet" href="./catalog-responsive.css?v=30" />
-    <link rel="stylesheet" href="./catalog-adaptive-final.css?v=30" />
-    <link rel="stylesheet" href="./product-page.css?v=3" />
-    <link rel="stylesheet" href="./product-quick-view.css?v=8" />
+    <meta name="description" content="Каталог автозапчастей под заказ из Китая с проверкой совместимости по VIN.">
+    <link rel="canonical" href="https://xn--d1abifc1bn.xn--p1ai/catalog/">
+    <link rel="stylesheet" href="./catalog-v2.css?v=30">
+    <link rel="stylesheet" href="./catalog-responsive.css?v=30">
+    <link rel="stylesheet" href="./catalog-adaptive-final.css?v=30">
+    <link rel="stylesheet" href="./product-page.css?v=3">
+    <link rel="stylesheet" href="./product-quick-view.css?v=8">
 
-    <link rel="stylesheet" href="./catalog-redesign.css?v=31" />
-    <link rel="stylesheet" href="./catalog-mobile-polish.css?v=31" />
-    <link rel="stylesheet" href="./privacy-controls.css?v=5" />
+    <link rel="stylesheet" href="./catalog-redesign.css?v=31">
+    <link rel="stylesheet" href="./catalog-mobile-polish.css?v=31">
+    <link rel="stylesheet" href="./privacy-controls.css?v=5">
     <link rel="stylesheet" href="./site-sizing.css?v=1">
   <link rel="stylesheet" href="./shared-header.css?v=12">
     <script src="./preview-compat.js"></script>
@@ -548,6 +546,14 @@
     }
     #request #requestSelection .basket-expand:hover { background: var(--catalog-bg); }
 
+    /* Cyrillic-capable fallback keeps the ruble sign visible on every platform. */
+    .currency-ruble {
+      font-family: "Noto Sans", "DejaVu Sans", "Segoe UI", Arial, sans-serif;
+      font-weight: 600;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
     /* CTA states: transparent until the related user input is ready. */
     #catalogSearch > button,
     #request .request-submit {
@@ -704,7 +710,8 @@
         place-items: center;
         position: fixed;
         z-index: 1100;
-        right: calc((100vw - var(--catalog-page)) / 2);
+        /* Match the right edge of the catalogue card inside the scaled artboard. */
+        right: 76.8px;
         bottom: 28px;
         left: auto;
         width: 76px;
@@ -858,10 +865,10 @@
       100% { transform: scale(1); }
     }
     body:has(#catalog) .toast {
-      right: calc((100vw - var(--catalog-page)) / 2 + 96px);
+      right: 172.8px;
       bottom: 36px;
       z-index: 1090;
-      max-width: 320px;
+      max-width: min(320px, calc(100vw - 124px));
       border: 1px solid var(--catalog-line-strong);
       background: var(--catalog-surface-raised);
       color: var(--catalog-text);
@@ -900,7 +907,7 @@
     @media (max-width: 1199px) {
       body:has(#catalog) .toast {
         right: 16px;
-        bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+        bottom: calc(104px + env(safe-area-inset-bottom, 0px));
         left: 16px;
         max-width: none;
         transform: translateY(8px) scale(.98);
@@ -938,10 +945,10 @@
 <link rel="stylesheet" href="./catalog-mobile.css?v=11">
 <style>#catalog-title {font-size:24px;line-height:1.2;font-weight:550;margin:0 0 20px;color:var(--catalog-text);}</style></head>
   <body class="site-scaled">
-    <header class="reference-header" data-header>
+    <header class="reference-header" data-header="">
       <div class="reference-header-shell">
         <a class="reference-logo" href="/" aria-label="Китрейд, на главную">
-          <img src="./assets/kitrade-wordmark.webp" alt="Китрейд" />
+          <img src="./assets/kitrade-wordmark.webp" alt="Китрейд">
         </a>
         <nav class="reference-nav" aria-label="Категории каталога">
           <a href="/#company">О компании</a>
@@ -951,27 +958,14 @@
           <a href="/catalog/">Каталог</a>
         </nav>
         <div class="reference-header-actions">
-          <a class="reference-phone" href="tel:+79952453000" aria-label="Позвонить по номеру 8 (995) 245-30-00">8 (995) 245-30-00</a>
+          <a class="reference-phone" href="tel:+79952453000" aria-label="Позвонить по номеру +7 (995) 245-30-00">+7 (995) 245-30-00</a>
           <a class="reference-contact" href="/#contacts" data-od-id="header-cart">Связаться с нами</a>
-          <button
-            class="menu-toggle"
-            type="button"
-            aria-expanded="false"
-            aria-controls="mobile-navigation"
-            aria-label="Открыть меню"
-            data-menu-toggle
-          >
+          <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-navigation" aria-label="Открыть меню" data-menu-toggle="">
             <span></span><span></span><span></span>
           </button>
         </div>
       </div>
-      <nav
-        class="mobile-nav"
-        id="mobile-navigation"
-        aria-label="Мобильная навигация"
-        hidden
-        data-mobile-nav
-      >
+      <nav class="mobile-nav" id="mobile-navigation" aria-label="Мобильная навигация" hidden="" data-mobile-nav="">
         <a href="/#company">О компании</a>
         <a href="/#about">Преимущества</a>
         <a href="/#workflow">Доставка</a>
@@ -989,45 +983,45 @@
           <div class="panel-heading">
             <div>
               <span>Подбор запчасти</span>
-              <h2>Фильтры каталога</h2>
+              <h2>Фильтр</h2>
             </div>
             <button id="resetFilters" type="button" aria-label="Очистить фильтры">Очистить</button>
           </div>
 
           <div class="catalog-filter-stack">
             <div class="filter-group filter-dropdown" id="brandFilters">
-              <button class="filter-trigger" type="button" data-filter-toggle aria-expanded="false">
-                <span><small>Марка</small><strong data-filter-summary>Все марки</strong></span>
+              <button class="filter-trigger" type="button" data-filter-toggle="" aria-expanded="false">
+                <span><small>Марка</small><strong data-filter-summary="">Все марки</strong></span>
                 <i aria-hidden="true"></i>
               </button>
-              <div class="filter-popover" data-filter-popover hidden>
-                <label class="filter-search"><span aria-hidden="true"></span><input type="search" data-filter-search placeholder="Найти марку" autocomplete="off" /></label>
-                <div class="filter-options" data-filter-options></div>
-                <p class="filter-empty" data-filter-empty hidden>Марка не найдена</p>
+              <div class="filter-popover" data-filter-popover="" hidden="">
+                <label class="filter-search"><span aria-hidden="true"></span><input type="search" data-filter-search="" placeholder="Найти марку" autocomplete="off"></label>
+                <div class="filter-options" data-filter-options=""></div>
+                <p class="filter-empty" data-filter-empty="" hidden="">Марка не найдена</p>
               </div>
             </div>
 
             <div class="filter-group filter-dropdown is-disabled" id="modelFilters">
-              <button class="filter-trigger" type="button" data-filter-toggle aria-expanded="false" disabled>
-                <span><small>Модель</small><strong data-filter-summary>Сначала выберите марку</strong></span>
+              <button class="filter-trigger" type="button" data-filter-toggle="" aria-expanded="false" disabled="">
+                <span><small>Модель</small><strong data-filter-summary="">Сначала выберите марку</strong></span>
                 <i aria-hidden="true"></i>
               </button>
-              <div class="filter-popover" data-filter-popover hidden>
-                <label class="filter-search"><span aria-hidden="true"></span><input type="search" data-filter-search placeholder="Найти модель" autocomplete="off" /></label>
-                <div class="filter-options" data-filter-options></div>
-                <p class="filter-empty" data-filter-empty hidden>Модель не найдена</p>
+              <div class="filter-popover" data-filter-popover="" hidden="">
+                <label class="filter-search"><span aria-hidden="true"></span><input type="search" data-filter-search="" placeholder="Найти модель" autocomplete="off"></label>
+                <div class="filter-options" data-filter-options=""></div>
+                <p class="filter-empty" data-filter-empty="" hidden="">Модель не найдена</p>
               </div>
             </div>
 
             <div class="filter-group filter-dropdown" id="typeFilters">
-              <button class="filter-trigger" type="button" data-filter-toggle aria-expanded="false">
-                <span><small>Категория</small><strong data-filter-summary>Все категории</strong></span>
+              <button class="filter-trigger" type="button" data-filter-toggle="" aria-expanded="false">
+                <span><small>Категория</small><strong data-filter-summary="">Все категории</strong></span>
                 <i aria-hidden="true"></i>
               </button>
-              <div class="filter-popover" data-filter-popover hidden>
-                <label class="filter-search"><span aria-hidden="true"></span><input type="search" data-filter-search placeholder="Найти категорию" autocomplete="off" /></label>
-                <div class="filter-options" data-filter-options></div>
-                <p class="filter-empty" data-filter-empty hidden>Категория не найдена</p>
+              <div class="filter-popover" data-filter-popover="" hidden="">
+                <label class="filter-search"><span aria-hidden="true"></span><input type="search" data-filter-search="" placeholder="Найти категорию" autocomplete="off"></label>
+                <div class="filter-options" data-filter-options=""></div>
+                <p class="filter-empty" data-filter-empty="" hidden="">Категория не найдена</p>
               </div>
             </div>
           </div>
@@ -1035,9 +1029,18 @@
           <fieldset class="filter-condition" id="conditionFilters">
             <legend>Состояние</legend>
             <div>
-              <label><input type="radio" name="condition" value="" checked /><span>Любая</span></label>
-              <label><input type="radio" name="condition" value="Новое" /><span>Новая</span></label>
-              <label><input type="radio" name="condition" value="Б/у" /><span>Б/у</span></label>
+              <label><input type="radio" name="condition" value="" checked=""><span>Любая</span></label>
+              <label><input type="radio" name="condition" value="Новое"><span>Новая</span></label>
+              <label><input type="radio" name="condition" value="Б/у"><span>Б/у</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="filter-condition" id="originFilters" data-od-id="catalog-origin-filter">
+            <legend>Тип запчасти</legend>
+            <div>
+              <label><input type="radio" name="origin" value="" checked><span>Все</span></label>
+              <label><input type="radio" name="origin" value="Оригинал"><span>Оригинал</span></label>
+              <label><input type="radio" name="origin" value="Аналог"><span>Аналог</span></label>
             </div>
           </fieldset>
 
@@ -1046,11 +1049,11 @@
         </aside>
 
         <section class="results-panel" id="catalog-results" data-od-id="catalog-results" aria-live="polite">
-          <h1 id="catalog-title">Автозапчасти под заказ</h1>
+          <h1 id="catalog-title">Автозапчасти под заказ из Китая</h1>
           <form class="catalog-search" id="catalogSearch">
             <label for="catalogQuery">
-              <span>Название детали, артикул или OEM</span>
-              <input id="catalogQuery" type="search" placeholder="Например: передняя фара или 81110-0R180" autocomplete="off" />
+              <span>Укажите название детали или артикул</span>
+              <input id="catalogQuery" type="search" placeholder="Например: передняя фара или 81110-0R180" autocomplete="off">
             </label>
             <button type="submit">Найти</button>
           </form>
@@ -1065,8 +1068,8 @@
           </div>
 
           <div class="parts-grid" id="partsGrid"></div>
-          <a class="load-more" id="loadMore" hidden style="display: none">Показать еще</a>
-          <div class="empty-state" id="emptyState" hidden>
+          <a class="load-more" id="loadMore" hidden="" style="display: none">Показать еще</a>
+          <div class="empty-state" id="emptyState" hidden="">
             <h3>Ничего не найдено</h3>
             <p>Сбросьте часть фильтров или отправьте запрос менеджеру для ручного подбора.</p>
             <a class="catalog-mobile-pickup-link" href="/#request" data-od-id="mobile-pickup-empty">Оставить заявку на подбор <span aria-hidden="true">→</span></a>
@@ -1076,8 +1079,8 @@
         <div class="catalog-request-column" data-od-id="catalog-request-column">
         <aside class="request-panel" id="request" data-request-step="1">
           <p class="request-kicker"><span></span>Заявка</p>
-          <h2 data-request-title>Соберите корзину<br />запроса</h2>
-          <p class="request-intro" data-request-intro>Добавьте детали или опишите задачу. Цена в каталоге — за деталь; доставку рассчитает менеджер.</p>
+          <h2 data-request-title="">Соберите корзину<br>запроса</h2>
+          <p class="request-intro" data-request-intro="">Добавьте детали или опишите задачу. Цена в каталоге — за деталь; доставку рассчитает менеджер.</p>
 
           <div data-request-stage="details">
             <div class="request-selection" id="requestSelection">
@@ -1088,54 +1091,54 @@
             <div class="request-lookup" data-od-id="catalog-manual-request">
               <p class="request-manual-label">Не нашли нужную запчасть?</p>
               <a class="request-manual-link" href="/#request" data-od-id="catalog-manual-request-link">Оставить заявку на подбор <span aria-hidden="true">→</span></a>
-              <p class="request-error" data-request-details-error role="alert"></p>
+              <p class="request-error" data-request-details-error="" role="alert"></p>
             </div>
           </div>
-          <div class="request-contact-stage" data-request-stage="contacts" hidden>
-            <p class="request-summary" data-request-summary></p>
+          <div class="request-contact-stage" data-request-stage="contacts" hidden="">
+            <p class="request-summary" data-request-summary=""></p>
             <label class="request-field">
               <span>Ваше имя</span>
-              <input id="requestCustomerName" type="text" autocomplete="name" placeholder="Иван Иванов" />
+              <input id="requestCustomerName" type="text" autocomplete="name" placeholder="Иван Иванов">
             </label>
             <label class="request-field">
-              <span data-request-contact-label>Телефон</span>
-              <input id="requestCustomerContact" type="tel" autocomplete="tel" inputmode="tel" placeholder="+7 (___) ___-__-__" />
+              <span data-request-contact-label="">Телефон</span>
+              <input id="requestCustomerContact" type="tel" autocomplete="tel" inputmode="tel" placeholder="+7 (___) ___-__-__">
             </label>
             <fieldset class="request-messengers">
               <legend>Удобный способ связи</legend>
-              <label><input type="radio" name="catalogMessenger" value="Max" checked /><span>Max</span></label>
-              <label><input type="radio" name="catalogMessenger" value="Telegram" /><span>Telegram</span></label>
-              <label><input type="radio" name="catalogMessenger" value="Звонок" /><span>Звонок</span></label>
+              <label><input type="radio" name="catalogMessenger" value="Max" checked=""><span>Max</span></label>
+              <label><input type="radio" name="catalogMessenger" value="Telegram"><span>Telegram</span></label>
+              <label><input type="radio" name="catalogMessenger" value="Звонок"><span>Звонок</span></label>
             </fieldset>
             <label class="request-comment">
               <span>Комментарий</span>
               <textarea id="requestComment" placeholder="Город доставки и дополнительные пожелания"></textarea>
             </label>
             <label class="request-consent">
-              <input id="requestPrivacyConsent" type="checkbox" />
+              <input id="requestPrivacyConsent" type="checkbox">
               <span>Я согласен на обработку персональных данных на условиях <a href="/personal-data-consent/" target="_blank" rel="noopener">согласия</a>.</span>
             </label>
-            <p class="request-error" data-request-contact-error role="alert"></p>
+            <p class="request-error" data-request-contact-error="" role="alert"></p>
             <button class="request-back" id="requestBack" type="button">Назад</button>
           </div>
 
-          <div class="request-success" data-request-success hidden tabindex="-1">
+          <div class="request-success" data-request-success="" hidden="" tabindex="-1">
             <strong>Заявка отправлена</strong>
             <p>Менеджер свяжется с вами, уточнит детали и подготовит расчёт.</p>
           </div>
 
           <button class="request-submit" id="requestSubmit" type="button">Отправить на расчет</button>
-          <small data-request-note>Минимальная сумма заказа — 50 000 ₽ · можно объединить детали.</small>
+          <small data-request-note="">Минимальная сумма заказа — 50 000 ₽ · можно объединить детали.</small>
         </aside>
         <aside class="catalog-pickup-card reference-faq-contact" data-od-id="catalog-pickup-card" aria-labelledby="catalog-pickup-title">
           <div>
-            <h3 id="catalog-pickup-title" data-od-id="catalog-pickup-title"><span class="catalog-pickup-copy-desktop">Не нашли<br />нужную запчасть?</span><span class="catalog-pickup-copy-mobile">Не нашли запчасть в каталоге?</span></h3>
+            <h3 id="catalog-pickup-title" data-od-id="catalog-pickup-title"><span class="catalog-pickup-copy-desktop">Не нашли<br>нужные детали?</span><span class="catalog-pickup-copy-mobile">Не нашли<br>нужные детали?</span></h3>
             <p><span class="catalog-pickup-copy-desktop">Оставьте заявку или позвоните нам — и мы всё найдём.</span><span class="catalog-pickup-copy-mobile">Укажите автомобиль и нужную деталь — менеджер проверит возможность поставки из Китая.</span></p>
             <div class="catalog-pickup-actions" data-od-id="catalog-pickup-actions">
               <a href="/#request" data-od-id="catalog-pickup-link">Оставить заявку <span aria-hidden="true">→</span></a>
-              <a class="catalog-pickup-phone" href="tel:+79952453000" data-od-id="catalog-pickup-phone" aria-label="Позвонить по номеру 8 (995) 245-30-00">
-                <span>Позвонить напрямую</span>
-                <strong>8 (995) 245-30-00</strong>
+              <a class="catalog-pickup-phone" href="tel:+79952453000" data-od-id="catalog-pickup-phone" aria-label="Позвонить по номеру +7 (995) 245-30-00">
+                <span>Позвонить </span>
+                <strong>+7 (995) 245-30-00</strong>
               </a>
             </div>
           </div>
@@ -1146,26 +1149,26 @@
     </main>
 
     <footer class="catalog-footer">
-      <a href="/" aria-label="Китрейд, на главную"><img src="./assets/external-media/cloudinary-6a8387a47ccd342e.webp" alt="Китрейд" /></a>
+      <a href="/" aria-label="Китрейд, на главную"><img src="./assets/external-media/cloudinary-6a8387a47ccd342e.webp" alt="Китрейд"></a>
       <nav class="catalog-footer-legal" aria-label="Правовая информация">
         <a href="/privacy-policy/">Политика обработки персональных данных</a>
         <a href="/personal-data-consent/">Согласие на обработку персональных данных</a>
-        <button type="button" data-cookie-settings>Настройки cookie</button>
+        <button type="button" data-cookie-settings="">Настройки cookie</button>
       </nav>
       <p>© 2026 Китрейд. Все права защищены.</p>
     </footer>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="./catalog-data-loader.js?v=2"></script>
+    <script src="./catalog-data-loader.js?v=4"></script>
     <script src="./product-quick-view.js?v=12"></script>
     <script src="./site-runtime-config.js?v=2"></script>
     <script src="./analytics.js?v=4"></script>
     <script src="./catalog-inquiry.js?v=4"></script>
-    <script src="./catalog-app.js?v=45"></script>
-    <script src="./catalog-adaptive.js?v=17"></script>
+    <script src="./catalog-app.js?v=47"></script>
+    <script src="./catalog-adaptive.js?v=20"></script>
     <script src="./privacy-controls.js?v=2"></script>
-    <script src="./artboard-scale.js?v=4" defer></script>
-<script src="./basket-drawer.js?v=4"></script>
+    <script src="./artboard-scale.js?v=4" defer=""></script>
+<script src="./basket-drawer.js?v=5"></script>
 <script src="./catalog-pickup.js?v=1"></script>
 <style>
 @media (min-width: 1200px) {
@@ -1207,6 +1210,26 @@
   sync();
 })();
 </script>
-<link rel="stylesheet" href="./basket-checkout.css?v=2"><script src="./basket-checkout.js?v=2"></script>
-</body>
-</html>
+<link rel="stylesheet" href="./basket-checkout.css?v=4"><script src="./basket-checkout.js?v=3"></script>
+
+
+<script>
+  (() => {
+    const conditionLabels = document.querySelectorAll('#conditionFilters label span');
+    if (conditionLabels[0]) conditionLabels[0].textContent = 'Любое';
+    if (conditionLabels[1]) conditionLabels[1].textContent = 'Новое';
+    const filterNote = document.querySelector('#originFilters + .filter-note');
+    if (filterNote) filterNote.textContent = 'Можно выбрать несколько категорий.';
+    const pickupTitle = document.querySelector('#catalog-pickup-title');
+    if (pickupTitle) pickupTitle.innerHTML = '<span class="catalog-pickup-copy-desktop">Не нашли<br>нужные детали?</span><span class="catalog-pickup-copy-mobile">Не нашли<br>нужные детали?</span>';
+    const syncPartCopy = () => document.querySelectorAll('#partsGrid .part-description').forEach((copy) => {
+      const message = 'Цена может отличаться, в зависимости от комплектации, проверим по VIN.';
+      if (copy.textContent !== message) copy.textContent = message;
+    });
+    syncPartCopy();
+    new MutationObserver(syncPartCopy).observe(document.querySelector('#partsGrid') || document.body, { childList: true, subtree: true });
+  })();
+</script>
+
+
+</body></html>

@@ -609,6 +609,18 @@
     #0b0d0e;
 }
 
+.home-catalog-no-photo {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--home-catalog-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.home-catalog-no-photo[hidden] { display: none; }
+
 .home-catalog-card-media::after {
   position: absolute;
   inset: auto 0 0;

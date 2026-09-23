@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { isDirectPublicImage, readCatalogData, normalizePhoto } from "./lib/data.mjs";
+import { isUploadedCatalogPhoto, readCatalogData, normalizePhoto } from "./lib/data.mjs";
 import { getPublicCategory, isVisibleCatalogItem } from "./lib/domain.mjs";
 import { registryIndexes, validateRegistry } from "./lib/registry.mjs";
 import { breadcrumbStructuredData, buildSeoState, organizationStructuredData, productStructuredData } from "./lib/seo.mjs";
@@ -150,6 +150,13 @@ function formatPrice(item) {
   return formatPartPrice(item?.price);
 }
 
+function formatPriceMarkup(item) {
+  const price = escapeHtml(formatPrice(item));
+  return price.endsWith(" ₽")
+    ? `${price.slice(0, -2)} <span class="currency-ruble" aria-label="рублей">₽</span>`
+    : price;
+}
+
 function ensureSingleFavicon(html) {
   const withoutExistingFavicon = html.replace(
     /^[\t ]*<link\b(?=[^>]*\brel=["'][^"']*\bicon\b[^"']*["'])[^>]*>[\t ]*\r?\n?/gim,
@@ -175,18 +182,9 @@ function deliveryLabel() {
   return "доставка отдельно";
 }
 
-function fallbackPhoto(item) {
-  const subject = [item?.title, item?.detail, item?.subcategory, item?.category]
-    .filter(Boolean).join(" ").toLocaleLowerCase("ru");
-  if (/фара|фонарь|оптика|автосвет/.test(subject)) return "/assets/01-catalog-led-headlamp.png";
-  if (/крыло/.test(subject)) return "/assets/02-catalog-front-fender.png";
-  if (/реш[её]тка|нижн[^ ]* бампер/.test(subject)) return "/assets/03-catalog-lower-grille.png";
-  return "";
-}
-
 function sourcePhoto(item) {
   const rawUrl = item?.photos?.[0];
-  return isDirectPublicImage(rawUrl) ? normalizePhoto(rawUrl) : "";
+  return isUploadedCatalogPhoto(rawUrl) ? normalizePhoto(rawUrl) : "";
 }
 
 function productImageAlt(content, item, brand, model) {
@@ -202,11 +200,11 @@ function productCard(product, item) {
   const content = productState?.content || {};
   const title = content.h1 || product.name;
   const publicCategory = indexes.categories.get(product.category_id)?.name || product.public_category || getPublicCategory(item || {});
-  const photo = sourcePhoto(item) || fallbackPhoto(item);
+  const photo = sourcePhoto(item);
   const imageAlt = productImageAlt(content, item, indexes.brands.get(product.brand_id), indexes.models.get(product.model_id));
   const image = photo
-    ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(imageAlt)}" loading="lazy" /><div class="photo-fallback" hidden>Фото уточняется</div>`
-    : '<div class="photo-fallback">Фото уточняется</div>';
+    ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(imageAlt)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false" /><div class="photo-fallback" hidden>Фото отсутствует</div>`
+    : '<div class="photo-fallback">Фото отсутствует</div>';
   const description = content.cardDescription || "Цена — за деталь. Доставка отдельно. Проверка по VIN.";
   const href = productState?.indexable ? ` href="${escapeHtml(product.canonical_path)}"` : "";
   return `
@@ -217,9 +215,9 @@ function productCard(product, item) {
           <h3><a class="part-title-link"${href} data-product-link data-product-id="${escapeHtml(item?.id || product.source_id)}">${escapeHtml(title)}</a></h3>
           <p class="part-description">${escapeHtml(description)}</p>
           <div class="part-meta">
-            <strong class="part-price">${escapeHtml(formatPrice(item))}</strong>
-            <span class="part-time">${escapeHtml(deliveryLabel(item))}</span>
-            <button class="card-action" type="button" data-add="${escapeHtml(item?.id || product.source_id)}">В заявку</button>
+             <strong class="part-price">${formatPriceMarkup(item)}</strong>
+             <span class="part-time">${escapeHtml(deliveryLabel(item))}</span>
+             <button class="card-action" type="button" data-add="${escapeHtml(item?.id || product.source_id)}">В корзину</button>
           </div>
         </div>
       </article>`;
@@ -346,6 +344,11 @@ const paginationSitemapPaths = [
 
 if (path.resolve(outputDir) !== path.join(projectDir, "dist")) throw new Error("Unsafe output directory");
 fs.mkdirSync(outputDir, { recursive: true });
+for (const staleFile of ["catalog.html", "product-preview.html"]) {
+  const target = path.join(outputDir, staleFile);
+  if (path.dirname(target) !== outputDir) throw new Error(`Unsafe stale file target: ${target}`);
+  fs.rmSync(target, { force: true });
+}
 const catalogOutputDir = path.join(outputDir, "catalog");
 if (path.dirname(catalogOutputDir) !== outputDir) throw new Error("Unsafe catalog output directory");
 fs.mkdirSync(catalogOutputDir, { recursive: true });
@@ -478,8 +481,7 @@ function productPage(product, item) {
   const state = seoState.productState.get(product.product_id);
   const content = state?.content || {};
   const title = content.h1 || product.name;
-  const realPhoto = sourcePhoto(item);
-  const photo = realPhoto || fallbackPhoto(item);
+  const photo = sourcePhoto(item);
   const imageAlt = productImageAlt(content, item, brand, model);
   const description = String(content.description || "").replaceAll("—", "–");
   const meta = content.meta || [brand?.name, model?.name].filter(Boolean).join(" · ");
@@ -511,7 +513,7 @@ function productPage(product, item) {
     + `<span aria-current="page">${escapeHtml(title)}</span>`;
   const seo = seoState.seoByPath.get(product.canonical_path);
   const robots = state?.indexable ? "" : '<meta name="robots" content="noindex,follow" />';
-  const productPhotos = (item?.photos || []).filter(isDirectPublicImage).map(normalizePhoto);
+  const productPhotos = (item?.photos || []).filter(isUploadedCatalogPhoto).map(normalizePhoto);
   const productData = { id: String(item?.id || product.source_id), title, article: content.article || "", price: numericPrice(item?.price) || 0, canonical_path: product.canonical_path, photos: productPhotos.length ? productPhotos : (photo ? [photo] : []) };
   const breadcrumbSchema = breadcrumbStructuredData([
     { name: "Главная", path: "/" }, { name: "Каталог", path: "/catalog/" },
@@ -553,7 +555,7 @@ function productPage(product, item) {
         <a href="/#company">О компании</a><a href="/#about">Преимущества</a><a href="/#workflow">Доставка</a><a href="/#orders">Кейсы</a><a href="/catalog/">Каталог</a>
       </nav>
       <div class="reference-header-actions">
-        <a class="reference-phone" href="tel:+79952453000">8 (995) 245-30-00</a>
+        <a class="reference-phone" href="tel:+79952453000">+7 (995) 245-30-00</a>
         <a class="reference-contact" href="/#contacts">Связаться с нами</a>
         <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="product-mobile-navigation" aria-label="Открыть меню" data-menu-toggle><span></span><span></span><span></span></button>
       </div>
@@ -566,23 +568,23 @@ function productPage(product, item) {
     <div class="product-page-shell">
       <nav class="catalog-breadcrumbs" aria-label="Хлебные крошки">${breadcrumbHtml}</nav>
       <article class="product-page-layout" data-od-id="product-main">
-        <div class="product-page-gallery">${photo ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(imageAlt)}" />` : "Фото уточняется"}${productPhotos.length > 1 ? `<div class="product-photo-thumbs" aria-label="Фотографии товара">${productPhotos.map((url, index) => `<button type="button" data-product-photo="${escapeHtml(url)}" aria-label="Ракурс ${index + 1}" aria-pressed="${index === 0}"><img src="${escapeHtml(url)}" alt="" loading="lazy" /></button>`).join('')}</div>` : ''}</div>
+        <div class="product-page-gallery">${photo ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(imageAlt)}" onerror="this.outerHTML='Фото отсутствует'" />` : "Фото отсутствует"}${productPhotos.length > 1 ? `<div class="product-photo-thumbs" aria-label="Фотографии товара">${productPhotos.map((url, index) => `<button type="button" data-product-photo="${escapeHtml(url)}" aria-label="Ракурс ${index + 1}" aria-pressed="${index === 0}"><img src="${escapeHtml(url)}" alt="" loading="lazy" /></button>`).join('')}</div>` : ''}</div>
         <div class="product-page-content">
           <p class="product-page-category">${escapeHtml(category?.name || product.public_category || item?.category || "Запчасть")}</p>
           <h1>${escapeHtml(seo?.h1 || title)}</h1>
           <p class="product-page-meta">${escapeHtml(meta)}</p>
           <div class="product-page-purchase">
             <span>Стоимость детали</span>
-            <strong class="product-page-price">${escapeHtml(formatPrice(item))}</strong>
+             <strong class="product-page-price">${formatPriceMarkup(item)}</strong>
             <p>Доставку рассчитаем отдельно после проверки совместимости и наличия.</p>
-            <button class="product-page-request" type="button" data-product-add data-od-id="product-add">Добавить в корзину</button>
+             <button class="product-page-request" type="button" data-product-add data-od-id="product-add">В корзину</button>
             <p>Минимальная сумма заказа — 50 000 ₽. Можно объединить несколько деталей.</p>
             <div class="product-page-secondary"><a href="/catalog/">Все запчасти →</a></div>
           </div>
 <aside class="product-phone-help" data-od-id="product-phone-help" aria-labelledby="product-phone-help-title">
 <h2 id="product-phone-help-title">Удобнее по телефону?</h2>
 <p>Позвоните — найдём нужную запчасть и проконсультируем. Оформлять заказ через корзину необязательно.</p>
-<a href="tel:+79952453000" data-od-id="product-phone-help-number">8 (995) 245-30-00</a>
+<a href="tel:+79952453000" data-od-id="product-phone-help-number">+7 (995) 245-30-00</a>
 <img src="/assets/12-faq-contact-turbo.png" alt="" width="1672" height="941" loading="lazy">
 </aside>
           ${specificationHtml ? `<dl class="product-page-specs">${specificationHtml}</dl>` : ""}
@@ -614,10 +616,10 @@ function productPage(product, item) {
   <script id="product-page-data" type="application/json">${safeJson(productData)}</script>
   <script src="/site-runtime-config.js?v=2"></script>
   <script src="/analytics.js?v=4"></script>
-  <script src="/product-page.js?v=9"></script>
-  <link rel="stylesheet" href="/basket-checkout.css?v=2">
-  <script src="/basket-checkout.js?v=2"></script>
-  <script src="/basket-drawer.js?v=4"></script>
+  <script src="/product-page.js?v=10"></script>
+  <link rel="stylesheet" href="/basket-checkout.css?v=4">
+  <script src="/basket-checkout.js?v=3"></script>
+  <script src="/basket-drawer.js?v=5"></script>
   <script src="/privacy-controls.js?v=1"></script>
 </body>
 </html>`;

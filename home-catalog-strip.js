@@ -264,17 +264,9 @@
 
   const normalizePhoto = (url) => {
     const value = String(url || "").trim();
-    const match = value.match(/[?&]imageSlug=([^&]+)/);
-    if (match) return `https://80.img.avito.st${decodeURIComponent(match[1])}`;
-    return value.replace(/^http:\/\//i, "https://");
-  };
-
-  const fallbackPhoto = (item) => {
-    const value = normalizeText([item.title, item.detail, item.category].filter(Boolean).join(" "));
-    if (/фар|фонар|оптик/.test(value)) return sitePath("/assets/01-catalog-led-headlamp.png");
-    if (/крыл/.test(value)) return sitePath("/assets/02-catalog-front-fender.png");
-    if (/решетк|бампер/.test(value)) return sitePath("/assets/03-catalog-lower-grille.png");
-    return sitePath("/assets/01-catalog-led-headlamp.png");
+    if (value.startsWith("/assets/catalog-products/")) return sitePath(value);
+    if (window.KITRADE_PREVIEW_MODE && value.startsWith("data:image/")) return value;
+    return "";
   };
 
   const formatPrice = (value) => {
@@ -335,14 +327,14 @@
 
   const cardMarkup = (item) => {
     const id = String(item.id || "");
-    const image = normalizePhoto(item.photos?.[0]) || fallbackPhoto(item);
+    const image = normalizePhoto(item.photos?.[0]);
     const category = item._category || "Запчасть";
     const meta = [item._brand, item._model, item.article ? `OEM ${item.article}` : ""].filter(Boolean).join(" · ");
     return `
       <article class="home-catalog-card" data-product-card data-product-id="${escapeHtml(id)}">
         <a class="home-catalog-card-link" href="${escapeHtml(sitePath(item.canonical_path))}" data-product-link data-product-id="${escapeHtml(id)}">
           <div class="home-catalog-card-media">
-            <img src="${escapeHtml(image)}" alt="${escapeHtml(item.title)}" loading="lazy" />
+            ${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false" /><span class="home-catalog-no-photo" hidden>Фото отсутствует</span>` : '<span class="home-catalog-no-photo">Фото отсутствует</span>'}
           </div>
           <div class="home-catalog-card-copy">
             <span class="home-catalog-card-category">${escapeHtml(category)}</span>

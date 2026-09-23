@@ -42,8 +42,24 @@
   </svg></span><span class="catalog-cart-copy"><strong>Корзина</strong><span data-mobile-cart-label>Пока пусто</span></span><b data-mobile-cart-count>0</b>`;
   document.body.append(dock);
 
+  const syncFloatingCartToGrid = () => {
+    const toast = document.querySelector('#toast');
+    if (!window.matchMedia('(min-width: 1200px)').matches) {
+      dock.style.removeProperty('right');
+      toast?.style.removeProperty('right');
+      return;
+    }
+    const gridRight = 76.8;
+    dock.style.setProperty('right', `${gridRight}px`, 'important');
+    toast?.style.setProperty('right', `${gridRight + 96}px`, 'important');
+  };
+  requestAnimationFrame(syncFloatingCartToGrid);
+  window.addEventListener('resize', syncFloatingCartToGrid, { passive: true });
+  window.visualViewport?.addEventListener('resize', syncFloatingCartToGrid, { passive: true });
+
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let activeFlights = 0;
+  const activeFlightCleanups = new Set();
   const spillParts = () => {
     if (reduceMotion.matches || typeof Element.prototype.animate !== 'function') return;
     // A small, bounded spill: parts rise over the rim, then fall to either side.
@@ -68,8 +84,19 @@
         return {offset:t, opacity:t < .65 ? Math.min(1, t * 12) : (1-t)/.35,
           transform:`translate3d(${spread*t}px, ${fall*t - (180+i*16)*t*(1-t)}px, 0) rotate(${direction*220*t}deg) scale(${1-.25*t})`};
       });
-      const motion = part.animate(frames, {duration:740 + i*35, easing:'linear', fill:'forwards'});
-      motion.onfinish = motion.oncancel = () => part.remove();
+      const spillDuration = 740 + i * 35;
+      const motion = part.animate(frames, {duration:spillDuration, easing:'linear', fill:'forwards'});
+      let spillDone = false;
+      const clearSpill = () => {
+        if (spillDone) return;
+        spillDone = true;
+        clearTimeout(spillWatchdog);
+        part.remove();
+      };
+      const spillWatchdog = setTimeout(clearSpill, spillDuration + 240);
+      motion.addEventListener('finish', clearSpill, { once: true });
+      motion.addEventListener('cancel', clearSpill, { once: true });
+      motion.finished.then(clearSpill, clearSpill);
     });
   };
   const receivePart = () => {
@@ -124,18 +151,31 @@
     const flight = flyer.animate(frames, { duration, easing: 'linear', fill: 'forwards' });
 
     let finished = false;
+    let watchdog = 0;
     const finishFlight = () => {
       if (finished) return;
       finished = true;
+      clearTimeout(watchdog);
+      activeFlightCleanups.delete(finishFlight);
       flyer.remove();
       activeFlights = Math.max(0, activeFlights - 1);
       document.body.classList.toggle('catalog-cart-flight-active', activeFlights > 0);
       receivePart();
       if (!activeFlights) window.dispatchEvent(new Event("kitrade:cart-landed"));
     };
+    activeFlightCleanups.add(finishFlight);
+    watchdog = setTimeout(finishFlight, duration + 320);
     flight.addEventListener('finish', finishFlight, { once: true });
     flight.addEventListener('cancel', finishFlight, { once: true });
+    flight.finished.then(finishFlight, finishFlight);
   };
+
+  const settleActiveFlights = () => [...activeFlightCleanups].forEach(finish => finish());
+  window.addEventListener('resize', settleActiveFlights, { passive: true });
+  window.addEventListener('pagehide', settleActiveFlights, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) settleActiveFlights();
+  });
 
   let activePanel = null;
   const blocked = new Map();

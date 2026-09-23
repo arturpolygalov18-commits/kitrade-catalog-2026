@@ -4,6 +4,24 @@
 
   window.KITRADE_PREVIEW_MODE = true;
 
+  // Open Design renders HTML in a sandbox without same-origin storage.
+  // Keep preview-only state in memory so page scripts can use sessionStorage
+  // without aborting the render when the browser blocks the native getter.
+  const previewStorage = (() => {
+    const values = new Map();
+    return {
+      getItem: (key) => values.has(String(key)) ? values.get(String(key)) : null,
+      setItem: (key, value) => values.set(String(key), String(value)),
+      removeItem: (key) => values.delete(String(key)),
+      clear: () => values.clear(),
+      key: (index) => [...values.keys()][index] ?? null,
+      get length() { return values.size; },
+    };
+  })();
+  try {
+    Object.defineProperty(window, "sessionStorage", { value: previewStorage, configurable: true });
+  } catch {}
+
   const splitUrl = (value) => {
     const match = String(value || "/").match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
     return { path: match?.[1] || "/", search: match?.[2] || "", hash: match?.[3] || "" };
